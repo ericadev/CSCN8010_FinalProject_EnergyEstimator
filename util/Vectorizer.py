@@ -21,7 +21,7 @@ class Vectorizer:
         tokenized_prompts = [self.tokenizer.encode(p) for p in cleaned_prompts]
         self.model = Word2Vec(tokenized_prompts, vector_size=vector_size, window=window,
                               min_count=min_count, workers=workers)
-        self.model.train(sentences, total_examples=len(sentences), epochs=10)
+        self.model.train(sentences, total_examples=len(sentences), epochs=1000)
     
     def clean_text(self, text):
         text = re.sub(r"\s+", " ", text)  # Remove extra whitespace
