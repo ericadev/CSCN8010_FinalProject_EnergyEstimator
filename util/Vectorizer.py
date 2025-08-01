@@ -31,7 +31,6 @@ class Vectorizer:
     def sentence_vector(self, sentence):
         """Compute average vector for a tokenized sentence"""
         valid_tokens = self.tokenizer.encode(self.clean_text(sentence))
-        print(valid_tokens)
         if not valid_tokens or len(valid_tokens) == 0:
             raise ValueError("No valid tokens found in the sentence.")
         # Return the average vector for the valid tokens
@@ -52,15 +51,4 @@ class Vectorizer:
         :param path: Path to load the model from
         """
         self.model = Word2Vec.load(path)
-
-    def update_dataframe_with_prompt_vector(self, df, column_name):
-        """
-        Computes the average vector for each sentence in a specified column of a DataFrame.
-        """
-        if column_name not in df.columns:
-            raise ValueError(f"Column '{column_name}' does not exist in the DataFrame.")
-        if df[column_name].dtype != 'object':
-            raise ValueError(f"Column '{column_name}' must contain text data (dtype 'object').")
-        df['prompt_vector'] = df[column_name].apply(lambda x: self.sentence_vector(x) if isinstance(x, list) else np.zeros(self.model.vector_size))
-        return df
     
