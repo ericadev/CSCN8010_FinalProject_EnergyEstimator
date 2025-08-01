@@ -1,6 +1,8 @@
 # A class that handles vectorization of text data using Word2Vec
+import tiktoken
 from gensim.models import Word2Vec
 import numpy as np
+import re
 
 class Vectorizer:
     def __init__(self, sentences, vector_size=100, window=5, min_count=1, workers=4):
@@ -13,29 +15,27 @@ class Vectorizer:
         :param min_count: Ignores all words with total frequency lower than this
         :param workers: Number of worker threads to train the model
         """
-        self.model = Word2Vec(sentences, vector_size=vector_size, window=window,
+        cleaned_prompts = [self.clean_text(s) for s in sentences]
+
+        self.tokenizer = tiktoken.get_encoding("cl100k_base")
+        tokenized_prompts = [self.tokenizer.encode(p) for p in cleaned_prompts]
+        self.model = Word2Vec(tokenized_prompts, vector_size=vector_size, window=window,
                               min_count=min_count, workers=workers)
+        self.model.train(sentences, total_examples=len(sentences), epochs=10)
     
-    def print_sentence_vector(self, sentence_tokens, model):
-        """Prints the average vector for a tokenized sentence"""
-        vector = self.sentence_vector(sentence_tokens, model)
-        print(f"Vector for sentence '{' '.join(sentence_tokens)}': {vector}")
+    def clean_text(self, text):
+        text = re.sub(r"\s+", " ", text)  # Remove extra whitespace
+        text = text.strip().lower()
+        return text
 
-    def sentence_vector(self, sentence_tokens, model):
+    def sentence_vector(self, sentence):
         """Compute average vector for a tokenized sentence"""
-        valid_tokens = [token for token in sentence_tokens if token in model.wv]
-        if not valid_tokens:
-            return np.zeros(model.vector_size)
-        return np.mean([model.wv[token] for token in valid_tokens], axis=0)
-    
-    def get_vector(self, word):
-        """
-        Returns the vector for a given word.
-
-        :param word: The word to get the vector for
-        :return: The vector for the word or None if the word is not in vocabulary
-        """
-        return self.model.wv[word] if word in self.model.wv else None
+        valid_tokens = self.tokenizer.encode(self.clean_text(sentence))
+        print(valid_tokens)
+        if not valid_tokens or len(valid_tokens) == 0:
+            raise ValueError("No valid tokens found in the sentence.")
+        # Return the average vector for the valid tokens
+        return np.mean([self.model.wv[token] for token in valid_tokens], axis=0)
 
     def save_model(self, path):
         """
@@ -61,6 +61,6 @@ class Vectorizer:
             raise ValueError(f"Column '{column_name}' does not exist in the DataFrame.")
         if df[column_name].dtype != 'object':
             raise ValueError(f"Column '{column_name}' must contain text data (dtype 'object').")
-        df['prompt_vector'] = df[column_name].apply(lambda x: self.sentence_vector(x, self.model) if isinstance(x, list) else np.zeros(self.model.vector_size))
+        df['prompt_vector'] = df[column_name].apply(lambda x: self.sentence_vector(x) if isinstance(x, list) else np.zeros(self.model.vector_size))
         return df
     
