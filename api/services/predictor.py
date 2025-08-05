@@ -1,5 +1,8 @@
-from services.util.BartModel import BartModel
-from services.util.SBertModel import SBertModel
+#from services.util.BartModel import BartModel
+#from services.util.SBertModel import SBertModel
+from api.services.util.SBertModel import SBertModel
+from api.services.util.BartModel import BartModel
+
 import joblib
 import os
 
