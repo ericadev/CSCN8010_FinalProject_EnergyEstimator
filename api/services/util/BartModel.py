@@ -43,10 +43,6 @@ class BartModel:
         # Decode output
         optimized = self.tokenizer.decode(summary_ids[0], skip_special_tokens=True).strip()
 
-        # ✅ Repetition check
-        if not optimized or self.is_too_similar(prompt, optimized):
-            return prompt  # Use original if too similar or empty
-
         return optimized
 
 

@@ -22,7 +22,7 @@ if st.button("Optimize Prompt"):
 
             try:
                 # Send to your FastAPI backend
-                response = requests.post("http://localhost:8000/predict", json=payload)
+                response = requests.post("http://127.0.0.1:8000/api/predictor/predict", json=payload)
 
                 if response.status_code == 200:
                     data = response.json()
@@ -31,9 +31,8 @@ if st.button("Optimize Prompt"):
                     st.subheader("✅ Optimization Results")
                     st.markdown(f"**Original Prompt:**\n{data['original_prompt']}")
                     st.markdown(f"**Optimized Prompt:**\n{data['optimized_prompt']}")
-                    st.markdown(f"**Token Count:** `{data['token_count']}`")
-                    st.markdown(f"**Energy Saved:** `{data['energy_saved']} kWh`")
-                    st.markdown(f"**Semantic Similarity:** `{round(data['similarity_score'], 3)}`")
+                    st.markdown(f"**Energy Saved:** `{data['energy_saved (%)']} kWh`")
+                    st.markdown(f"**Semantic Similarity:** `{round(data['semantic_similarity'], 3)}`")
 
                 else:
                     st.error(f"API Error: {response.status_code} – {response.text}")
