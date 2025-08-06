@@ -31,8 +31,10 @@ if st.button("Optimize Prompt"):
                     st.subheader("✅ Optimization Results")
                     st.markdown(f"**Original Prompt:**\n{data['original_prompt']}")
                     st.markdown(f"**Optimized Prompt:**\n{data['optimized_prompt']}")
-                    st.markdown(f"**Energy Saved:** `{data['energy_saved (%)']} kWh`")
-                    st.markdown(f"**Semantic Similarity:** `{round(data['semantic_similarity'], 3)}`")
+                    st.markdown(f"**Energy Saved:** `{data.get('energy_saved', 'N/A')} kWh`")
+
+                    st.markdown(f"**Semantic Similarity:** `{round(data.get('similarity_score', 0.0), 3)}`")
+
 
                 else:
                     st.error(f"API Error: {response.status_code} – {response.text}")
