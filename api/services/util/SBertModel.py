@@ -4,9 +4,8 @@ import joblib
 import os
 
 class SBertModel:
-    def __init__(self, model_name='all-MiniLM-L6-v2'):
-        model_path = os.path.join(os.path.dirname(__file__), '../../../models/sbert_model.pkl')
-        self.model = joblib.load(model_path)
+    def __init__(self, model='all-MiniLM-L6-v2'):
+        self.model = model
 
     def encode(self, texts, convert_to_tensor=False):
         return self.model.encode(texts, convert_to_tensor=convert_to_tensor)

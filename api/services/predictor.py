@@ -5,15 +5,18 @@ from api.services.util.SBertModel import SBertModel
 import joblib
 import os
 import numpy as np
+from sentence_transformers import SentenceTransformer
 
 # === Load Models ===
 ENERGY_MODEL_PATH = os.path.join(os.path.dirname(__file__), '../../models/energy_model_rf.pkl')
-SBERT_MODEL_PATH = os.path.join(os.path.dirname(__file__), '../../models/sbert_model.pkl')
+SBERT_MODEL_PATH = os.path.join(os.path.dirname(__file__), '../../models/sbert_model')
 
 try:
     bart = BartModel()
     rf_model = joblib.load(ENERGY_MODEL_PATH)
-    sbert = SBertModel(SBERT_MODEL_PATH)
+    sbert_model = SentenceTransformer(SBERT_MODEL_PATH)
+    sbert = SBertModel(model=sbert_model)
+    print("Models initialized successfully.")
 except Exception as e:
     raise RuntimeError(f"Failed to initialize models: {str(e)}")
 
