@@ -1,11 +1,12 @@
 from sentence_transformers import SentenceTransformer, util
 import numpy as np
-import pandas as pd
 import joblib
+import os
 
 class SBertModel:
     def __init__(self, model_name='all-MiniLM-L6-v2'):
-        self.model = joblib.load("../models/sbert_model.pkl")
+        model_path = os.path.join(os.path.dirname(__file__), '../../../models/sbert_model.pkl')
+        self.model = joblib.load(model_path)
 
     def encode(self, texts, convert_to_tensor=False):
         return self.model.encode(texts, convert_to_tensor=convert_to_tensor)
@@ -21,27 +22,25 @@ class SBertModel:
         avg_word_length = char_length / token_length if token_length > 0 else 0
         features = [[token_length, char_length, avg_word_length]]
         log_prediction = model.predict(features)[0]
-        return max(np.expm1(log_prediction), 1e-6)  # Reverse log1p and clamp minimum
+        return max(np.expm1(log_prediction), 1e-6)
 
     def compare_prompts(self, original, optimized, model):
         original_energy = self.predict_energy(model, original)
         optimized_energy = self.predict_energy(model, optimized)
         similarity = self.get_semantic_similarity(original, optimized)
 
-        # Reject if similarity too low
         if similarity < 0.80:
             return {
                 "original_prompt": original,
                 "optimized_prompt": optimized,
                 "original_energy": round(original_energy, 6),
-                "optimized_energy": round(original_energy, 6),  # force same
+                "optimized_energy": round(original_energy, 6),
                 "energy_saved (%)": 0.0,
                 "shortening_coeff": round(len(optimized) / len(original), 2),
                 "semantic_similarity": round(similarity, 4),
                 "output_confidence": "Rejected (Low Similarity)"
             }
 
-        # Handle cosmetic changes
         if similarity > 0.97 and abs(len(optimized) - len(original)) < 5:
             optimized_energy = original_energy
             energy_saving = 0.0
@@ -61,7 +60,6 @@ class SBertModel:
             "semantic_similarity": round(similarity, 4),
             "output_confidence": "High" if similarity >= 0.85 else "Low"
         }
-    
+
     def return_results(self, original, optimized, model): 
         return self.compare_prompts(original, optimized, model)
-
