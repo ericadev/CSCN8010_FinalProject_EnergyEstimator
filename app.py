@@ -174,8 +174,14 @@ if st.button("Optimize Prompt"):
                     json={"prompt": prompt_input},
                     timeout=60
                 )
-                if response.status_code == 200:
+                response_by_verb_count = requests.post(
+                    "http://127.0.0.1:8000/api/predictor/predict_by_verbs",
+                    json={"prompt": prompt_input},
+                    timeout=60
+                )
+                if response.status_code == 200 and response_by_verb_count.status_code == 200:
                     data = response.json()
+                    
                     if DEBUG:
                         st.expander("🔍 Raw API response (debug)").json(data)
 
@@ -187,7 +193,7 @@ if st.button("Optimize Prompt"):
                     similarity_score = float(data.get("similarity_score", 0.0))
 
                     # Derived
-                    energy_saved_kwh = max(0.0, original_energy - optimized_energy)
+                    energy_saved_kwh = max(0.0, response_by_verb_count.json())
                     energy_pct       = 0.0 if original_energy <= 0 else round(((original_energy - optimized_energy)/original_energy)*100, 2)
                     similarity_pct   = round(similarity_score * 100, 2)
                     money_saved_usd  = energy_saved_kwh * COST_PER_KWH
