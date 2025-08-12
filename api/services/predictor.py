@@ -2,6 +2,8 @@
 
 from api.services.util.BartModel import BartModel
 from api.services.util.SBertModel import SBertModel
+from api.services.util.PredictorModel import PredictorModel
+from exp_offset_model import ExpOffsetModel
 import joblib
 import os
 import numpy as np
@@ -10,12 +12,15 @@ from sentence_transformers import SentenceTransformer
 # === Load Models ===
 ENERGY_MODEL_PATH = os.path.join(os.path.dirname(__file__), '../../models/energy_model_rf.pkl')
 SBERT_MODEL_PATH = os.path.join(os.path.dirname(__file__), '../../models/sbert_model')
+PREDICTOR_MODEL_PATH = os.path.join(os.path.dirname(__file__), '../../models/exp_offset_model.pkl')
 
 try:
     bart = BartModel()
     rf_model = joblib.load(ENERGY_MODEL_PATH)
     sbert_model = SentenceTransformer(SBERT_MODEL_PATH)
     sbert = SBertModel(model=sbert_model)
+    predictor_model: ExpOffsetModel = joblib.load(PREDICTOR_MODEL_PATH)
+    predictor = PredictorModel(model=predictor_model)
     print("Models initialized successfully.")
 except Exception as e:
     raise RuntimeError(f"Failed to initialize models: {str(e)}")
@@ -62,3 +67,6 @@ def predict_energy(prompt: str):
         "energy_saved": energy_saved,
         "similarity_score": similarity
     }
+
+def predict_energy_by_verbs(prompt: str):
+    return predictor.predict_energy(prompt)
