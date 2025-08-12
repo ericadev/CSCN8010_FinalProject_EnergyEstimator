@@ -1,9 +1,10 @@
 # 🌱 EcoPrompt AI – Sustainable Prompt Engineering for Energy Efficiency
 
 ## Group #8
-* Eris Leksi
-* Erica Holden
-* Reham Abuarquob
+* Eris Leksi (9067882)
+* Erica Holden (5490685)
+* Reham Abuarquob (9062922)
+ 
 
 ## Everything from the presentation is explained down here:
 
