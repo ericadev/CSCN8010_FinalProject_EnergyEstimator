@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import base64
 from typing import Any, Dict, Iterable, Optional
+import math  # <-- added for the verb-count prediction math
 
 # =========================
 # Config
@@ -357,3 +358,52 @@ if st.session_state.history:
 
         total_saved = float(df["saved_money"].sum())
         st.success(f"Total money saved so far: **{format_currency(total_saved)}**")
+
+# =========================
+# Predict: Saved Energy vs Verb Count (Chart)
+# =========================
+st.markdown("---")
+st.markdown("### 🔮 Predict Saved Energy from Verb Count")
+
+def _predict_delta_kwh_from_verbs(v: float) -> float:
+    """
+    Exponential (offset) model from your notebook:
+    Δenergy = c + a * exp(-b * verbs)
+
+    Fitted on df_avg with:
+      a=0.0014146098604270665, b=0.15259071948459085, c=0.0
+    """
+    a = 0.0014146098604270665
+    b = 0.15259071948459085
+    c = 0.0
+    return c + a * math.exp(-b * float(v))
+
+# Choose a hypothetical verb count to inspect
+v_selected = st.slider(
+    "Select a verb count",
+    min_value=0, max_value=12, value=2, step=1,
+    help="Try different numbers of verbs to see the predicted energy saved (kWh)."
+)
+
+# Build curve 0..12 verbs
+xs = list(range(0, 13))
+ys = [_predict_delta_kwh_from_verbs(v) for v in xs]
+y_selected = _predict_delta_kwh_from_verbs(v_selected)
+
+# Line chart with highlighted point
+fig_curve, ax_curve = plt.subplots(figsize=(6, 4))
+ax_curve.plot(xs, ys, marker='o', label="Predicted Δenergy (kWh)")
+ax_curve.scatter([v_selected], [y_selected], s=80, zorder=3, label=f"Selected ({v_selected} verbs)")
+ax_curve.set_xlabel("Verb count")
+ax_curve.set_ylabel("Predicted energy saved (kWh)")
+ax_curve.set_title("Predicted Energy Saved vs Verb Count")
+ax_curve.grid(True)
+ax_curve.legend()
+st.pyplot(fig_curve)
+
+# Quick readout + cost
+pred_cost_saved = y_selected * COST_PER_KWH  # uses your existing COST_PER_KWH and dollars
+st.info(
+    f"At **{v_selected}** verbs, predicted energy saved is **{y_selected:.6f} kWh** "
+    f"(~ **{pred_cost_saved*100:.2f}¢** at {CURRENCY}{COST_PER_KWH:.3f}/kWh)."
+)
