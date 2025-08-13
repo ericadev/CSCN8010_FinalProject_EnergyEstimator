@@ -11,7 +11,7 @@ import math  # <-- added for the verb-count prediction math
 # =========================
 st.set_page_config(page_title="Sustainable AI - Prompt Optimizer", layout="centered")
 
-COST_PER_KWH = 0.284  # 28.4¢ per kWh (stored as dollars)
+COST_PER_KWH = 0.158  # 15.8¢ per kWh (stored as dollars)
 CURRENCY = "$"        # totals use dollars
 DEBUG = False         # True -> show raw API JSON
 
